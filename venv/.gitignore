@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+
+# Django stuff
+*.log
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Static files (optional if using collectstatic)
+staticfiles/
+
+# Migrations (optional depending on workflow)
+# */migrations/*
+# !*/migrations/__init__.py
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+
+# Python build
+build/
+dist/
+*.egg-info/
+
+# Cache
+.pytest_cache/
+.mypy_cache/
+
+# Node (if using frontend tools)
+node_modules/
+
+# Temporary files
+*.swp
+*.swo
