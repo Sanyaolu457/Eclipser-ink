@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} — Eclipser ink.{% endblock %}
+
+{% block content %}
+<div class="page">
+
+  <div>
+    <a href="{% url 'home' %}" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      All posts
+    </a>
+
+    <article class="article">
+
+      {% if post.tags.all %}
+        <div class="article-tags">
+          {% for tag in post.tags.all %}
+            <a href="{% url 'posts_by_tag' tag.slug %}" class="tag">#{{ tag.name }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <h1 class="article-title">{{ post.title }}</h1>
+
+      <div class="author-bar">
+        <a href="{% url 'user_profile' post.author.username %}" class="avatar avatar-md">
+          {{ post.author.username|slice:":1" }}
+        </a>
+        <div class="author-info">
+          <a href="{% url 'user_profile' post.author.username %}" class="author-name" style="text-decoration:none; color:inherit;">{{ post.author.username }}</a>
+          <div class="author-meta">
+            <span>{{ post.created_at|date:"F d, Y" }}</span>
+            <div class="meta-dot"></div>
+            <span>{{ post.created_at|date:"g:i A" }}</span>
+          </div>
+        </div>
+        <div class="read-time">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          {{ post.content|wordcount|divisibleby:200|default:"1" }} min read
+        </div>
+      </div>
+
+      <div class="article-body">
+        {% if post.content %}
+          {{ post.content|linebreaksbr }}
+        {% else %}
+          <p style="color:var(--muted); font-style:italic;">No content yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="article-footer">
+        {% if post.mentions.all %}
+          <div class="mentions-row">
+            <span class="mentions-label">Mentioned:</span>
+            {% for person in post.mentions.all %}
+              <a href="{% url 'user_profile' person.username %}" class="mention-chip">
+                <span class="mention-chip-avatar">{{ person.username|slice:":1" }}</span>
+                @{{ person.username }}
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div></div>
+        {% endif %}
+
+        <div class="share-row">
+          <span class="share-label">Share</span>
+          <a class="share-btn" title="Copy link" onclick="copyLink(this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          </a>
+          <a class="share-btn" title="Share on X" href="https://twitter.com/intent/tweet?text={{ post.title|urlencode }}&url={{ request.build_absolute_uri }}" target="_blank">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </article>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-block">
+      <p class="sidebar-title">Written by</p>
+      <div class="author-card">
+        <a href="{% url 'user_profile' post.author.username %}" class="avatar avatar-lg" style="margin-bottom:12px;">
+          {{ post.author.username|slice:":1" }}
+        </a>
+        <div class="author-name">{{ post.author.username }}</div>
+        <p class="author-bio">
+          {% if post.author.profile.bio %}{{ post.author.profile.bio|truncatewords:15 }}{% else %}Member of the Eclipser ink. community{% endif %}
+        </p>
+        <a href="{% url 'user_profile' post.author.username %}" class="author-posts-link">View all posts</a>
+      </div>
+    </div>
+
+    {% if post.tags.all %}
+      <div class="sidebar-block">
+        <p class="sidebar-title">Tags</p>
+        <div class="tag-cloud">
+          {% for tag in post.tags.all %}
+            <a href="{% url 'posts_by_tag' tag.slug %}" class="tag">#{{ tag.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if related_posts %}
+      <div class="sidebar-block">
+        <p class="sidebar-title">Related Posts</p>
+        {% for related in related_posts %}
+          <a href="{% url 'post_detail' related.slug %}" class="related-post">
+            <div class="related-post-title">{{ related.title }}</div>
+            <div class="related-post-meta">{{ related.created_at|date:"M d, Y" }} · {{ related.author }}</div>
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </aside>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function copyLink(btn) {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      btn.style.borderColor = '#27ae60';
+      btn.style.color = '#27ae60';
+      btn.style.background = '#f0fdf4';
+      setTimeout(() => { btn.style.borderColor = ''; btn.style.color = ''; btn.style.background = ''; }, 1500);
+    });
+  }
+</script>
+{% endblock %}

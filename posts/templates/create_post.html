@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Write a Post — Eclipser ink.{% endblock %}
+
+{% block nav_left %}
+  <div class="nav-left">
+    <a href="{% url 'home' %}" class="nav-logo">Eclipser ink<span>.</span></a>
+    <div class="nav-divider"></div>
+    <span class="nav-page">New post</span>
+  </div>
+  <div class="nav-actions">
+    <a href="{% url 'home' %}" class="btn-ghost">Cancel</a>
+    <button type="submit" form="post-form" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      Publish
+    </button>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="page-narrow">
+
+  <div class="page-header">
+    <h1>Write a new post</h1>
+    <p>Share your thoughts with the community</p>
+  </div>
+
+  <div class="form-card">
+    <form method="POST" id="post-form">
+      {% csrf_token %}
+
+      <div class="form-card-body">
+
+        <div class="field field-title">
+          <div class="field-label"><label for="id_title">Title</label></div>
+          <input type="text" name="title" id="id_title" placeholder="Give your post a great title…"
+            maxlength="100" value="{{ form.title.value|default:'' }}"
+            oninput="countChars(this,'title-count',100)" required>
+          <div class="field-hint">
+            {% if form.title.errors %}<span class="field-error">{{ form.title.errors.0 }}</span>{% else %}<span></span>{% endif %}
+            <span class="char-count" id="title-count">0 / 100</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="id_content">Content</label>
+            <span class="optional">Optional</span>
+          </div>
+          <textarea name="content" id="id_content" placeholder="Write your post content here…"
+            oninput="countChars(this,'content-count',2000)">{{ form.content.value|default:'' }}</textarea>
+          <div class="field-hint">
+            {% if form.content.errors %}<span class="field-error">{{ form.content.errors.0 }}</span>{% else %}<span></span>{% endif %}
+            <span class="char-count" id="content-count">0 / 2000</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <div class="field-label">
+            <label>Tags</label>
+            <span class="optional">Pick relevant topics</span>
+          </div>
+          <div class="tag-selector">
+            <div class="tag-list">
+              {% for tag in form.tags.field.queryset %}
+                <input type="checkbox" name="tags" value="{{ tag.pk }}" id="tag_{{ tag.pk }}" class="tag-option"
+                  {% if tag.pk in form.tags.value %}checked{% endif %}>
+                <label for="tag_{{ tag.pk }}">#{{ tag.name }}</label>
+              {% empty %}
+                <span class="no-tags">No tags available yet.</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% if form.tags.errors %}<span class="field-error">{{ form.tags.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <label>Mention people</label>
+            <span class="optional">Optional</span>
+          </div>
+          <div class="tag-selector">
+            <div class="mention-list">
+              {% for participant in form.mentions.field.queryset %}
+                <input type="checkbox" name="mentions" value="{{ participant.pk }}" id="mention_{{ participant.pk }}" class="mention-option"
+                  {% if participant.pk in form.mentions.value %}checked{% endif %}>
+                <label for="mention_{{ participant.pk }}">
+                  <span class="mention-avatar">{{ participant.username|slice:":1" }}</span>
+                  @{{ participant.username }}
+                </label>
+              {% empty %}
+                <span class="no-tags">No participants to mention.</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <a href="{% url 'home' %}" class="btn-ghost">Cancel</a>
+        <button type="submit" class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Publish post
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="tips">
+    <p class="tips-title">Writing tips</p>
+    <ul>
+      <li>Keep your title clear and specific — it's the first thing people read.</li>
+      <li>Add tags so readers can find your post by topic.</li>
+      <li>Mention other members to notify them about your post.</li>
+    </ul>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function countChars(el, id, max) {
+    const c = document.getElementById(id);
+    c.textContent = el.value.length + ' / ' + max;
+    c.style.color = el.value.length > max * 0.9 ? '#dc2626' : 'var(--muted)';
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    const t = document.getElementById('id_title');
+    const c = document.getElementById('id_content');
+    if (t) countChars(t, 'title-count', 100);
+    if (c) countChars(c, 'content-count', 2000);
+  });
+</script>
+{% endblock %}

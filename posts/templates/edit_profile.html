@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile — Eclipser ink.{% endblock %}
+
+{% block nav_left %}
+  <div class="nav-left">
+    <a href="{% url 'home' %}" class="nav-logo">Eclipser ink<span>.</span></a>
+    <div class="nav-divider"></div>
+    <span class="nav-page">Edit profile</span>
+  </div>
+  <div class="nav-actions">
+    <a href="{% url 'user_profile' user.username %}" class="btn-ghost">Cancel</a>
+    <button type="submit" form="edit-form" class="btn-primary">Save changes</button>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="page-narrow">
+
+  <div class="page-header">
+    <h1>Edit your profile</h1>
+    <p>Update your personal information and how others see you</p>
+  </div>
+
+  <div class="form-card">
+    <form method="POST" enctype="multipart/form-data" id="edit-form">
+      {% csrf_token %}
+
+      <div class="avatar-section">
+        <div style="flex-shrink:0;">
+          <div class="avatar avatar-xl" id="avatar-preview" style="border: 3px solid var(--border);">
+            {% if profile.image %}
+              <img src="{{ profile.image.url }}" alt="Profile photo">
+            {% else %}
+              {{ user.username|slice:":1" }}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="avatar-info">
+          <h3>Profile photo</h3>
+          <p>JPG or PNG. Max 2MB.<br>Recommended: square image.</p>
+          <div class="avatar-actions">
+            <input type="file" name="image" id="image-input" accept="image/*" onchange="previewImage(this)">
+            <button type="button" class="btn-upload" onclick="document.getElementById('image-input').click()">Upload photo</button>
+            {% if profile.image %}
+              <button type="button" class="btn-remove" onclick="removeImage()">Remove</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card-body">
+
+        <span class="section-label">Account info</span>
+
+        <div class="field">
+          <div class="field-label">
+            <label>Username</label>
+            <span class="optional">Cannot be changed</span>
+          </div>
+          <input type="text" value="{{ user.username }}" readonly>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <label>Email</label>
+            <span class="optional">Cannot be changed</span>
+          </div>
+          <input type="text" value="{{ user.email }}" readonly>
+        </div>
+
+        <div class="field-divider"></div>
+        <span class="section-label">Public profile</span>
+
+        <div class="field">
+          <div class="field-label">
+            <label for="id_bio">Bio</label>
+            <span class="optional">Optional</span>
+          </div>
+          <textarea name="bio" id="id_bio" placeholder="Tell the community a little about yourself…"
+            maxlength="300" oninput="countChars(this,'bio-count',300)">{{ profile.bio|default:'' }}</textarea>
+          <div class="field-hint">
+            <span class="hint-text">Shown on your public profile</span>
+            <span class="char-count" id="bio-count">0 / 300</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <a href="{% url 'user_profile' user.username %}" class="btn-ghost">Cancel</a>
+        <button type="submit" class="btn-primary">Save changes</button>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="danger-zone">
+    <p class="danger-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Danger zone
+    </p>
+    <p class="danger-desc">Deleting your account is permanent and cannot be undone. All your posts will be removed.</p>
+    <button class="btn-danger" onclick="confirmDelete()">Delete my account</button>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function previewImage(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('avatar-preview').innerHTML =
+          `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" alt="Preview">`;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function removeImage() {
+    document.getElementById('avatar-preview').innerHTML = `<span>{{ user.username|slice:":1" }}</span>`;
+    document.getElementById('image-input').value = '';
+  }
+
+  function countChars(el, id, max) {
+    const c = document.getElementById(id);
+    c.textContent = el.value.length + ' / ' + max;
+    c.style.color = el.value.length > max * 0.9 ? '#dc2626' : 'var(--muted)';
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const bio = document.getElementById('id_bio');
+    if (bio) countChars(bio, 'bio-count', 300);
+  });
+
+  function confirmDelete() {
+    if (confirm('Are you sure? This cannot be undone.')) {
+      window.location.href = "{% url 'delete_account' %}";
+    }
+  }
+</script>
+{% endblock %}

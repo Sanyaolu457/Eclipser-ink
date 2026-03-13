@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Eclipser ink.{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      {% block nav_left %}
+        <a href="{% url 'home' %}" class="nav-logo">Eclipser ink<span>.</span></a>
+        <ul class="nav-links">
+          <li><a href="{% url 'home' %}">Home</a></li>
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+            <li><a href="{% url 'create_post' %}" class="nav-btn">+ Write</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}" class="nav-btn">Sign in</a></li>
+          {% endif %}
+        </ul>
+      {% endblock %}
+    </div>
+  </nav>
+
+  <div id="message">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <script>
+    setTimeout(function () {
+      const msg = document.getElementById('message');
+      if (msg) {
+        msg.style.transition = 'opacity 0.5s ease';
+        msg.style.opacity = '0';
+        setTimeout(() => msg.remove(), 500);
+      }
+    }, 3000);
+  </script>
+
+  {% block extra_js %}{% endblock %}
+
+</body>
+</html>

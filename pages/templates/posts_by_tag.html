@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}#{{ tag.name }} — Eclipser ink.{% endblock %}
+
+{% block content %}
+<div class="page">
+
+  <main>
+    <a href="{% url 'home' %}" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      All posts
+    </a>
+
+    <div class="tag-hero">
+      <div class="tag-hero-left">
+        <div class="tag-icon">#</div>
+        <div class="tag-hero-info">
+          <h1><span>#</span>{{ tag.name }}</h1>
+          <p>Posts tagged with "{{ tag.name }}"</p>
+        </div>
+      </div>
+      <span class="tag-post-count">{{ posts|length }} post{{ posts|length|pluralize }}</span>
+    </div>
+
+    {% for post in posts %}
+      <article class="post-card">
+
+        <div class="post-meta">
+          <a href="{% url 'user_profile' post.author.username %}" class="avatar avatar-sm">{{ post.author.username|slice:":1" }}</a>
+          <a href="{% url 'user_profile' post.author.username %}" class="post-author">{{ post.author.username }}</a>
+          <div class="meta-dot"></div>
+          <span class="post-date">{{ post.created_at|date:"M d, Y" }}</span>
+        </div>
+
+        <h2 class="post-title">
+          <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+        </h2>
+
+        <p class="post-excerpt">{{ post.content|truncatewords:40 }}</p>
+
+        {% if post.tags.all %}
+          <div class="post-tags">
+            {% for t in post.tags.all %}
+              <a href="{% url 'posts_by_tag' t.slug %}" class="tag {% if t.name == tag.name %}active{% endif %}">#{{ t.name }}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="post-footer">
+          <div class="mentions">
+            {% if post.mentions.all %}
+              with
+              {% for person in post.mentions.all %}
+                <a href="{% url 'user_profile' person.username %}">@{{ person.username }}</a>{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            {% else %}
+              <span style="color:var(--border)">·</span>
+            {% endif %}
+          </div>
+          <a href="{% url 'post_detail' post.slug %}" class="read-more">
+            Read more
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+      </article>
+    {% empty %}
+      <div class="empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <p>No posts found with <strong>#{{ tag.name }}</strong> yet.</p>
+        {% if user.is_authenticated %}<a href="{% url 'create_post' %}">Write the first one</a>{% endif %}
+      </div>
+    {% endfor %}
+
+  </main>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-block">
+      <p class="sidebar-title">Other Tags</p>
+      <div class="tag-cloud">
+        {% for t in all_tags %}
+          {% if t.name != tag.name %}
+            <a href="{% url 'posts_by_tag' t.slug %}" class="tag">#{{ t.name }}</a>
+          {% endif %}
+        {% empty %}
+          <p style="font-size:13px; color:var(--muted)">No other tags.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+      <div class="write-cta">
+        <h3>Write about #{{ tag.name }}</h3>
+        <p>Share your thoughts on this topic with the community.</p>
+        <a href="{% url 'create_post' %}">Start writing</a>
+      </div>
+    {% endif %}
+
+  </aside>
+
+</div>
+{% endblock %}
