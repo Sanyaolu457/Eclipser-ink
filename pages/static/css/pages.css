@@ -1082,7 +1082,6 @@ nav {
   .article-body  { font-size: 16px; }
   .tag-hero { padding: 24px 20px; }
   .profile-hero { flex-direction: column; align-items: flex-start; gap: 20px; padding: 24px 20px; }
-  .nav-links { display: none; }
 }
 
 @media (max-width: 600px) {
